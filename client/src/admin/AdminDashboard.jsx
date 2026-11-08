@@ -1,32 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import defaultMenuData from '../data/defaultMenu.json';
-import QuickPriceTable from './QuickPriceTable';
 import CategoryManager from './CategoryManager';
-import SettingsManager from './SettingsManager';
-import QRCodeDesigner from './QRCodeDesigner';
-import MediaFolderHelper from './MediaFolderHelper';
-import ActivityLog from './ActivityLog';
 import ItemModal from './ItemModal';
 
 import {
   Utensils,
-  DollarSign,
   Layers,
-  FolderOpen,
-  Settings,
-  QrCode,
   LogOut,
   Plus,
   Search,
-  Star,
   Edit2,
   Trash2,
   Eye,
-  ShieldCheck,
   Download,
-  FileSpreadsheet,
-  History
+  AlertCircle
 } from 'lucide-react';
 
 export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
@@ -34,7 +22,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Tabs: 'dishes' | 'prices' | 'categories' | 'media' | 'qr' | 'logs' | 'settings'
+  // Tabs: 'dishes' | 'categories' ONLY (Simplified as requested)
   const [activeTab, setActiveTab] = useState('dishes');
 
   // Search & filter for dishes tab
@@ -113,8 +101,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
   const filteredDishes = (data.items || []).filter(item => {
     const matchesCat = dishCatFilter === 'ALL' || item.categoryId === dishCatFilter;
     const matchesSearch = !dishSearch.trim() || 
-      item.name.toLowerCase().includes(dishSearch.toLowerCase().trim()) ||
-      (item.description && item.description.toLowerCase().includes(dishSearch.toLowerCase().trim()));
+      item.name.toLowerCase().includes(dishSearch.toLowerCase().trim());
     return matchesCat && matchesSearch;
   });
 
@@ -124,13 +111,8 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
   };
 
   const navItems = [
-    { id: 'dishes', label: 'Dishes', icon: Utensils },
-    { id: 'prices', label: 'Quick Prices', icon: DollarSign },
+    { id: 'dishes', label: 'Dishes & Photos', icon: Utensils },
     { id: 'categories', label: 'Categories', icon: Layers },
-    { id: 'media', label: 'Photos Folder', icon: FolderOpen },
-    { id: 'qr', label: 'Table QR', icon: QrCode },
-    { id: 'logs', label: 'Activity Log', icon: History },
-    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   return (
@@ -139,70 +121,55 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
       <header className="sticky top-0 z-40 glass-header px-4 sm:px-6 py-3 border-b border-zinc-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold text-sm">
-            👑
+            DD
           </div>
           <div>
-            <h1 className="font-serif text-base sm:text-lg font-bold text-zinc-100 truncate max-w-[180px] sm:max-w-md">
-              {data.settings?.hotelName || "Dining Delight"}
+            <h1 className="font-serif text-sm sm:text-base font-bold text-zinc-100 flex items-center gap-2">
+              <span>Dining Delight Admin</span>
             </h1>
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-[10px] text-zinc-400 font-medium">
-                Owner Portal (OWASP Hardened)
-              </span>
-            </div>
+            <p className="text-[10px] text-zinc-400">
+              Manage Dishes, Live Prices & Photos
+            </p>
           </div>
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
-          {/* Export JSON / CSV Backup Dropdown */}
-          <a
-            href="/api/backup/export"
-            download
-            className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-medium transition-all"
-            title="Download Full JSON Backup"
+          {/* Download JSON Menu Backup */}
+          <button
+            onClick={() => api.downloadOfflineJson()}
+            title="Download Updated Menu (JSON)"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 text-xs font-medium border border-zinc-700 transition-colors cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-purple-400" />
-            <span>Backup</span>
-          </a>
+            <Download className="w-3.5 h-3.5 text-amber-400" />
+            <span>Download Menu</span>
+          </button>
 
-          <a
-            href="/api/backup/export-csv"
-            download
-            className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-medium transition-all"
-            title="Export Dishes as CSV"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-            <span>CSV</span>
-          </a>
-
-          {/* Customer View Button */}
+          {/* View Customer Menu Button */}
           <button
             onClick={onViewCustomerMenu}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-all cursor-pointer"
-            title="Preview Customer Menu"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 text-xs font-medium border border-zinc-700 transition-colors cursor-pointer"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-3.5 h-3.5 text-amber-400" />
             <span className="hidden sm:inline">View Menu</span>
           </button>
 
-          {/* Logout Button */}
+          {/* Logout */}
           <button
             onClick={handleLogout}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
-            title="Sign Out (Revoke Session)"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 text-xs font-medium border border-rose-800/60 transition-colors cursor-pointer"
+            title="Logout"
           >
-            <LogOut className="w-3.5 h-3.5 text-rose-400" />
-            <span className="hidden sm:inline">Sign Out</span>
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </header>
 
-      {/* 2. Main Content Area */}
-      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 flex-1">
-        {/* Desktop Tab Selector */}
-        <div className="hidden md:flex items-center gap-1.5 p-1.5 rounded-2xl glass-panel border border-zinc-800 mb-6 overflow-x-auto no-scrollbar">
+      {/* 2. Main Content Body */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
+        {/* Navigation Tabs (Dishes vs Categories) */}
+        <div className="flex items-center gap-2 mb-6 border-b border-zinc-800 pb-3">
           {navItems.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -210,32 +177,33 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-md font-bold'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
+                    ? 'bg-amber-500 text-black shadow-glow-gold font-bold'
+                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-amber-400/80'}`} />
+                <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Tab 1: DISHES (Full Menu CRUD) */}
+        {/* TAB 1: DISHES (Add, Edit, Photo, Price, Availability) */}
         {activeTab === 'dishes' && (
           <div className="space-y-4">
-            {/* Top Toolbar */}
+            {/* Action Bar */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl glass-panel border border-zinc-800">
-              <div className="flex items-center gap-2 flex-1 max-w-md">
+              {/* Search & Category Filter */}
+              <div className="flex items-center gap-2 flex-1">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={dishSearch}
                     onChange={(e) => setDishSearch(e.target.value)}
-                    placeholder="Search dishes by name..."
+                    placeholder="Search dish by name..."
                     className="w-full pl-9 pr-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-100 focus:outline-none focus:border-amber-500"
                   />
                 </div>
@@ -246,7 +214,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
                   className="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 focus:outline-none focus:border-amber-500"
                 >
                   <option value="ALL">All Categories</option>
-                  {data.categories.map((c) => (
+                  {(data.categories || []).map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>
@@ -257,31 +225,31 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
               {/* Add Dish Button */}
               <button
                 onClick={handleOpenAddModal}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-bold text-xs flex items-center justify-center gap-2 shadow-glow-gold active:scale-95 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs sm:text-sm shadow-glow-gold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add New Dish</span>
               </button>
             </div>
 
-            {/* Quick Stats Strip */}
+            {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-3">
               <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
                 <span className="text-xs text-zinc-400 block">Total Dishes</span>
                 <span className="font-serif text-xl font-bold text-amber-200">
-                  {data.items.length}
+                  {(data.items || []).length}
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
                 <span className="text-xs text-zinc-400 block">Categories</span>
                 <span className="font-serif text-xl font-bold text-amber-200">
-                  {data.categories.length}
+                  {(data.categories || []).length}
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
                 <span className="text-xs text-zinc-400 block">Sold Out</span>
                 <span className="font-serif text-xl font-bold text-rose-400">
-                  {data.items.filter(i => !i.isAvailable).length}
+                  {(data.items || []).filter(i => !i.isAvailable).length}
                 </span>
               </div>
             </div>
@@ -294,7 +262,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
                   className="rounded-2xl glass-panel border border-zinc-800 hover:border-zinc-700 transition-all p-3.5 flex flex-col justify-between"
                 >
                   <div>
-                    {/* Top image & badges */}
+                    {/* Top image & badge */}
                     <div className="relative w-full h-36 rounded-xl overflow-hidden bg-zinc-900 mb-3">
                       <img
                         src={item.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80'}
@@ -302,7 +270,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
                         className="w-full h-full object-cover"
                         onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80'; }}
                       />
-                      <div className="absolute top-2 left-2 flex gap-1.5">
+                      <div className="absolute top-2 left-2">
                         <span className="veg-indicator" />
                       </div>
 
@@ -315,35 +283,32 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-zinc-400 mb-1">
-                      <span>{getCategoryName(item.categoryId)}</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 className="font-bold text-sm text-zinc-100 leading-snug">
+                          {item.name}
+                        </h4>
+                        <span className="text-[11px] text-amber-400/80 font-medium">
+                          {getCategoryName(item.categoryId)}
+                        </span>
+                      </div>
                       <span className="text-base font-extrabold text-amber-300">
                         ₹{item.price}
                       </span>
                     </div>
-
-                    <h4 className="font-serif font-bold text-zinc-100 line-clamp-1">
-                      {item.name}
-                    </h4>
-
-                    {item.description && (
-                      <p className="mt-1 text-xs text-zinc-400 line-clamp-2 font-light">
-                        {item.description}
-                      </p>
-                    )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between">
-                    <span className={`text-[11px] font-semibold ${item.isAvailable ? 'text-emerald-400' : 'text-rose-400'}`}>
-                      {item.isAvailable ? '● In Stock' : '○ Out of stock'}
+                  {/* Action Buttons */}
+                  <div className="mt-3.5 pt-3 border-t border-zinc-800 flex items-center justify-between">
+                    <span className="text-[11px] text-zinc-500">
+                      {item.isAvailable ? '🟢 In Stock' : '🔴 Sold Out'}
                     </span>
 
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => handleOpenEditModal(item)}
                         className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors cursor-pointer"
-                        title="Edit Dish"
+                        title="Edit Dish & Photo"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
@@ -363,16 +328,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
           </div>
         )}
 
-        {/* Tab 2: QUICK INLINE PRICE TABLE */}
-        {activeTab === 'prices' && (
-          <QuickPriceTable
-            items={data.items}
-            categories={data.categories}
-            onItemsUpdated={(newItems) => setData(prev => ({ ...prev, items: newItems }))}
-          />
-        )}
-
-        {/* Tab 3: CATEGORIES */}
+        {/* TAB 2: CATEGORIES */}
         {activeTab === 'categories' && (
           <CategoryManager
             categories={data.categories}
@@ -380,55 +336,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
             onCategoriesUpdated={(newCats) => setData(prev => ({ ...prev, categories: newCats }))}
           />
         )}
-
-        {/* Tab 4: MEDIA & LOCAL FOLDER HELPER */}
-        {activeTab === 'media' && (
-          <MediaFolderHelper />
-        )}
-
-        {/* Tab 5: TABLE QR CODE & STANDEE */}
-        {activeTab === 'qr' && (
-          <QRCodeDesigner
-            hotelName={data.settings?.hotelName}
-            logoUrl={data.settings?.logoUrl}
-          />
-        )}
-
-        {/* Tab 6: ACTIVITY LOG & AUDIT TRAIL */}
-        {activeTab === 'logs' && (
-          <ActivityLog />
-        )}
-
-        {/* Tab 7: SETTINGS */}
-        {activeTab === 'settings' && (
-          <SettingsManager
-            settings={data.settings}
-            onSettingsUpdated={(newSettings) => setData(prev => ({ ...prev, settings: newSettings }))}
-          />
-        )}
       </div>
-
-      {/* 3. Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-800 px-1 py-1.5 flex items-center justify-around shadow-2xl">
-        {navItems.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center justify-center p-1 rounded-xl text-[9px] font-medium transition-all cursor-pointer ${
-                isActive
-                  ? 'text-amber-400 font-bold scale-105'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5 mb-0.5" />
-              <span className="truncate max-w-[48px]">{tab.label}</span>
-            </button>
-          );
-        })}
-      </nav>
 
       {/* Item Modal (Add / Edit) */}
       {itemModalOpen && (
