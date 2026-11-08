@@ -37,6 +37,17 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
 
   useEffect(() => {
     fetchMenu();
+
+    // Real-time Cloud Sync: Updates instantly when Admin changes dishes or prices
+    const unsubscribe = api.subscribeMenu((updatedMenu) => {
+      if (updatedMenu && Array.isArray(updatedMenu.items) && updatedMenu.items.length > 0) {
+        setData(updatedMenu);
+      }
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, []);
 
   // Filter items based on activeCategory and searchQuery
