@@ -81,7 +81,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
       await api.deleteItem(item.id);
       setData(prev => ({
         ...prev,
-        items: prev.items.filter(i => i.id !== item.id)
+        items: (prev.items || []).filter(i => i.id !== item.id)
       }));
     } catch (err) {
       alert(`Failed to delete item: ${err.message}`);
@@ -90,10 +90,11 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
 
   const handleItemSaved = (savedItem) => {
     setData(prev => {
-      const exists = prev.items.some(i => i.id === savedItem.id);
+      const currentItems = prev.items || [];
+      const exists = currentItems.some(i => i.id === savedItem.id);
       const newItems = exists
-        ? prev.items.map(i => i.id === savedItem.id ? savedItem : i)
-        : [...prev.items, savedItem];
+        ? currentItems.map(i => i.id === savedItem.id ? savedItem : i)
+        : [savedItem, ...currentItems];
       return { ...prev, items: newItems };
     });
   };
