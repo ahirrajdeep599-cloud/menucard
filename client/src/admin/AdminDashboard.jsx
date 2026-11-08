@@ -118,9 +118,9 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
   return (
     <div className="min-h-screen bg-[#08090d] text-zinc-100 flex flex-col pb-20 md:pb-8 selection:bg-amber-500/30">
       {/* 1. Top Navigation Bar */}
-      <header className="sticky top-0 z-40 glass-header px-4 sm:px-6 py-3 border-b border-zinc-800 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold text-sm">
+      <header className="sticky top-0 z-40 bg-[#0a0b10]/95 backdrop-blur-md px-4 sm:px-6 py-3 border-b border-zinc-800 flex items-center justify-between">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold text-xs sm:text-sm">
             DD
           </div>
           <div>
@@ -166,29 +166,30 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
         </div>
       </header>
 
+      {/* Sticky Quick Tab Bar (Always Visible on Mobile & Desktop) */}
+      <div className="sticky top-[53px] sm:top-[57px] z-30 bg-[#08090d]/95 backdrop-blur-md px-4 sm:px-6 py-2 border-b border-zinc-800 flex items-center gap-2">
+        {navItems.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-amber-500 text-black shadow-glow-gold font-bold'
+                  : 'bg-zinc-900/90 text-zinc-400 hover:text-white border border-zinc-800'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* 2. Main Content Body */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
-        {/* Navigation Tabs (Dishes vs Categories) */}
-        <div className="flex items-center gap-2 mb-6 border-b border-zinc-800 pb-3">
-          {navItems.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-amber-500 text-black shadow-glow-gold font-bold'
-                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full flex-1 pb-24 md:pb-8">
 
         {/* TAB 1: DISHES (Add, Edit, Photo, Price, Availability) */}
         {activeTab === 'dishes' && (
@@ -347,6 +348,37 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
           onSave={handleItemSaved}
         />
       )}
+
+      {/* Mobile Bottom Quick Switcher */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090a0f]/95 backdrop-blur-xl border-t border-zinc-800 px-4 py-2 flex items-center justify-around">
+        <button
+          onClick={() => setActiveTab('dishes')}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
+            activeTab === 'dishes' ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+          }`}
+        >
+          <Utensils className="w-4 h-4" />
+          <span>Dishes</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('categories')}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
+            activeTab === 'categories' ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Categories</span>
+        </button>
+
+        <button
+          onClick={onViewCustomerMenu}
+          className="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-semibold text-zinc-400 hover:text-amber-300 cursor-pointer transition-colors"
+        >
+          <Eye className="w-4 h-4 text-amber-400" />
+          <span>View Menu</span>
+        </button>
+      </nav>
     </div>
   );
 }

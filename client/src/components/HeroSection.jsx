@@ -44,14 +44,15 @@ export default function HeroSection({ settings, onExploreClick, onAdminClick }) 
             <span>100% Pure Vegetarian</span>
           </div>
 
-          {/* Discreet Admin Portal Button */}
+          {/* Clear & Accessible Admin Portal Button */}
           {onAdminClick && (
             <button
               onClick={onAdminClick}
-              title="Owner Admin Panel"
-              className="p-1.5 rounded-full bg-black/50 hover:bg-amber-500/20 text-zinc-400 hover:text-amber-300 border border-white/10 transition-colors cursor-pointer"
+              title="Admin Panel Login"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 hover:text-amber-200 border border-amber-500/40 text-xs font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
             >
-              <Lock className="w-3.5 h-3.5" />
+              <Lock className="w-3.5 h-3.5 text-amber-400" />
+              <span>Admin</span>
             </button>
           )}
         </div>

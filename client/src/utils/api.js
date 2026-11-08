@@ -129,6 +129,17 @@ export const api = {
     return { success: true, id };
   },
 
+  reorderCategories: async (orderList) => {
+    const menu = await api.getMenu();
+    const orderMap = new Map((orderList || []).map(item => [item.id, item.order]));
+    menu.categories = (menu.categories || []).map(cat => ({
+      ...cat,
+      order: orderMap.has(cat.id) ? orderMap.get(cat.id) : (cat.order || 0)
+    })).sort((a, b) => (a.order || 0) - (b.order || 0));
+    await saveFirebaseMenu(menu);
+    return menu.categories;
+  },
+
   // Items (Firebase Firestore Live Sync)
   getItems: async () => {
     const menu = await api.getMenu();

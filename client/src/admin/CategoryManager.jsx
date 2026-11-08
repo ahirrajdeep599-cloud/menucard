@@ -133,96 +133,99 @@ export default function CategoryManager({ categories = [], items = [], onCategor
           return (
             <div
               key={cat.id}
-              className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl glass-panel border border-zinc-800/80 hover:border-zinc-700 transition-colors"
+              className="p-3.5 sm:p-4 rounded-xl glass-panel border border-zinc-800/80 hover:border-zinc-700 transition-colors"
             >
-              {/* Category Name & Count */}
-              <div className="flex-1 min-w-0 mr-3">
-                {isEditing ? (
+              {isEditing ? (
+                /* Dedicated Full-Width Edit Row with Clear "Update" & "Cancel" Buttons */
+                <div className="w-full flex flex-col sm:flex-row gap-2.5">
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Category name"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-zinc-900 border-2 border-amber-500 text-sm font-medium text-white focus:outline-none"
+                    autoFocus
+                  />
                   <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-amber-500 text-xs text-white focus:outline-none"
-                      autoFocus
-                    />
                     <button
                       type="button"
+                      disabled={loading || !editName.trim()}
                       onClick={() => handleSaveEdit(cat.id)}
-                      className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white"
+                      className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
                     >
                       <Check className="w-4 h-4" />
+                      <span>Update</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditingId(null)}
-                      className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
+                      className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <X className="w-4 h-4" />
+                      <span>Cancel</span>
                     </button>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2.5">
+                </div>
+              ) : (
+                /* Normal Display Row */
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2.5 min-w-0 mr-2">
                     <span className="w-6 h-6 rounded-md bg-zinc-800/80 text-zinc-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
                       {index + 1}
                     </span>
                     <h4 className="font-semibold text-sm text-zinc-100 truncate">
                       {cat.name}
                     </h4>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 flex-shrink-0">
                       {dishCount} {dishCount === 1 ? 'dish' : 'dishes'}
                     </span>
                   </div>
-                )}
-              </div>
 
-              {/* Action Buttons: Move Up / Down, Edit, Delete */}
-              <div className="flex items-center gap-1">
-                {/* Move Up */}
-                <button
-                  type="button"
-                  disabled={index === 0}
-                  onClick={() => handleMove(index, -1)}
-                  className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 disabled:opacity-30 cursor-pointer"
-                  title="Move Up"
-                >
-                  <ArrowUp className="w-4 h-4" />
-                </button>
+                  {/* Action Buttons: Move Up / Down, Edit, Delete */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      onClick={() => handleMove(index, -1)}
+                      className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 disabled:opacity-30 cursor-pointer"
+                      title="Move Up"
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </button>
 
-                {/* Move Down */}
-                <button
-                  type="button"
-                  disabled={index === categories.length - 1}
-                  onClick={() => handleMove(index, 1)}
-                  className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 disabled:opacity-30 cursor-pointer"
-                  title="Move Down"
-                >
-                  <ArrowDown className="w-4 h-4" />
-                </button>
+                    <button
+                      type="button"
+                      disabled={index === categories.length - 1}
+                      onClick={() => handleMove(index, 1)}
+                      className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 disabled:opacity-30 cursor-pointer"
+                      title="Move Down"
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                    </button>
 
-                {/* Edit Name */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingId(cat.id);
-                    setEditName(cat.name);
-                  }}
-                  className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 cursor-pointer"
-                  title="Rename"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingId(cat.id);
+                        setEditName(cat.name);
+                      }}
+                      className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-300 cursor-pointer"
+                      title="Rename"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
 
-                {/* Delete */}
-                <button
-                  type="button"
-                  onClick={() => handleDelete(cat.id, cat.name)}
-                  className="p-2 rounded-lg bg-zinc-900 hover:bg-rose-950 text-zinc-400 hover:text-rose-400 cursor-pointer"
-                  title="Delete Category"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(cat.id, cat.name)}
+                      className="p-2 rounded-lg bg-zinc-900 hover:bg-rose-950 text-zinc-400 hover:text-rose-400 cursor-pointer"
+                      title="Delete Category"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
