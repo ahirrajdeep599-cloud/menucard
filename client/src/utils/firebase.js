@@ -54,8 +54,10 @@ export async function getFirebaseMenu() {
  */
 export async function saveFirebaseMenu(updatedData) {
   try {
-    await setDoc(menuDocRef, updatedData);
-    return updatedData;
+    const cleanData = JSON.parse(JSON.stringify(updatedData));
+    cleanData.updatedAt = new Date().toISOString();
+    await setDoc(menuDocRef, cleanData);
+    return cleanData;
   } catch (err) {
     console.error("Firestore save error:", err);
     throw err;

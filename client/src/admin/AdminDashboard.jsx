@@ -48,6 +48,17 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
 
   useEffect(() => {
     fetchMenuData();
+
+    // Real-time Cloud Sync: Updates instantly when any device changes dishes or categories
+    const unsubscribe = api.subscribeMenu((updatedMenu) => {
+      if (updatedMenu && Array.isArray(updatedMenu.items) && updatedMenu.items.length > 0) {
+        setData(updatedMenu);
+      }
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, []);
 
   const handleOpenAddModal = () => {

@@ -1,20 +1,19 @@
 /**
  * Compresses an image file client-side using an HTML canvas
- * Keeps aspect ratio and scales down to max 1400px width/height
- * Returns a compressed Blob / File
+ * Downscales to compact dimensions (~15-25 KB) so photos can be saved
+ * directly into Firebase Firestore without any external server or storage needed.
  */
-export async function compressImage(file, maxWidth = 1200, quality = 0.82) {
-  // If it's an SVG or already tiny, skip compression
-  if (file.type === 'image/svg+xml' || file.size < 120 * 1024) {
-    return file;
-  }
+export async function compressToDataUrl(file, maxWidth = 480, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) {
+      return reject(new Error('Please select a valid image file.'));
+    }
 
-  return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.readAsDataURL(file);
+    reader.onerror = () => reject(new Error('Failed to read image file'));
     reader.onload = (event) => {
       const img = new Image();
-      img.src = event.target.result;
+      img.onerror = () => reject(new Error('Failed to decode image in browser'));
       img.onload = () => {
         let width = img.width;
         let height = img.height;
@@ -40,26 +39,19 @@ export async function compressImage(file, maxWidth = 1200, quality = 0.82) {
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Try webp first, fallback to jpeg
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              resolve(file);
-              return;
-            }
-            const compressedFile = new File(
-              [blob],
-              file.name.replace(/\.[^/.]+$/, "") + ".webp",
-              { type: 'image/webp', lastModified: Date.now() }
-            );
-            resolve(compressedFile);
-          },
-          'image/webp',
-          quality
-        );
+        try {
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        } catch (e) {
+          resolve(event.target.result);
+        }
       };
-      img.onerror = () => resolve(file);
+      img.src = event.target.result;
     };
-    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
   });
+}
+
+export async function compressImage(file, maxWidth = 480, quality = 0.72) {
+  return compressToDataUrl(file, maxWidth, quality);
 }

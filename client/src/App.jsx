@@ -81,6 +81,31 @@ export default function App() {
     };
   }, []);
 
+  // Ensure Admin pages are never indexed by robots and do not carry preview image
+  useEffect(() => {
+    let robotsMeta = document.querySelector('meta[name="robots"]');
+    if (!robotsMeta) {
+      robotsMeta = document.createElement('meta');
+      robotsMeta.name = 'robots';
+      document.head.appendChild(robotsMeta);
+    }
+
+    const ogImageMeta = document.querySelector('meta[property="og:image"]');
+    const twitterImageMeta = document.querySelector('meta[name="twitter:image"]');
+
+    if (view === 'admin') {
+      document.title = 'Dining Delight | Admin Portal';
+      robotsMeta.content = 'noindex, nofollow';
+      if (ogImageMeta) ogImageMeta.setAttribute('content', '');
+      if (twitterImageMeta) twitterImageMeta.setAttribute('content', '');
+    } else {
+      document.title = 'Dining Delight Multicuisine Restaurant | 100% Pure Veg Menu';
+      robotsMeta.content = 'index, follow';
+      if (ogImageMeta) ogImageMeta.setAttribute('content', 'https://diningdelightmulticusine.netlify.app/og-image.jpg');
+      if (twitterImageMeta) twitterImageMeta.setAttribute('content', 'https://diningdelightmulticusine.netlify.app/og-image.jpg');
+    }
+  }, [view]);
+
   const navigateToAdmin = () => {
     window.history.pushState(null, '', '#admin');
     setView('admin');

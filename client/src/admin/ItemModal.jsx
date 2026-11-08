@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Check, AlertCircle, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { X, Upload, Check, AlertCircle, Image as ImageIcon, Sparkles, Trash2 } from 'lucide-react';
 import { api } from '../utils/api';
-import { compressImage } from '../utils/imageCompressor';
+import { compressToDataUrl } from '../utils/imageCompressor';
 
 export default function ItemModal({ item, categories = [], onClose, onSave }) {
   const isEditing = Boolean(item && item.id);
@@ -18,10 +18,6 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-
-  // Gallery picker state
-  const [galleryFiles, setGalleryFiles] = useState([]);
-  const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
     if (item) {
@@ -40,17 +36,6 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
     }
   }, [item, categories]);
 
-  // Load scanned photos for quick picker
-  const loadGallery = async () => {
-    try {
-      const res = await api.scanMedia();
-      setGalleryFiles(res.dishesFiles || []);
-      setShowGallery(true);
-    } catch (err) {
-      console.error("Failed to scan gallery:", err);
-    }
-  };
-
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -59,12 +44,11 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
     setUploading(true);
 
     try {
-      // Compress in browser canvas before uploading
-      const compressed = await compressImage(file, 1200, 0.82);
-      const res = await api.uploadImage(compressed, 'dishes');
-      setImageUrl(res.url);
+      // Compress directly to optimized WebP/JPEG data URL (~20 KB)
+      const dataUrl = await compressToDataUrl(file, 480, 0.72);
+      setImageUrl(dataUrl);
     } catch (err) {
-      setError(err.message || 'Image upload failed. Try pasting an image URL instead.');
+      setError(err.message || 'Image processing failed. Try another photo or paste a URL.');
     } finally {
       setUploading(false);
     }
@@ -221,27 +205,48 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
             />
           </div>
 
-          {/* Image Upload / URL Section */}
-          <div className="pt-2 border-t border-zinc-800">
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-zinc-300">
-                Dish Photo
-              </label>
-              <button
-                type="button"
-                onClick={loadGallery}
-                className="text-[11px] text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
-              >
-                <ImageIcon className="w-3.5 h-3.5" />
-                <span>Pick from Uploaded Media</span>
-              </button>
-            </div>
+          {/* Direct Photo Upload & URL Section */}
+          <div className="pt-3 border-t border-zinc-800 space-y-2">
+            <label className="block text-xs font-semibold text-zinc-300">
+              Dish Photo (Live Sync)
+            </label>
 
-            {/* Direct File Upload button */}
-            <div className="flex items-center gap-2">
-              <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-zinc-300 font-medium cursor-pointer transition-all">
-                <Upload className="w-4 h-4 text-amber-400" />
-                <span>{uploading ? 'Compressing & Uploading...' : 'Upload Image from PC/Phone'}</span>
+            {/* If photo is selected, show nice preview card */}
+            {imageUrl ? (
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900 border border-amber-500/40 shadow-inner">
+                <img
+                  src={imageUrl}
+                  alt="Dish Preview"
+                  className="w-16 h-16 rounded-xl object-cover border border-white/10 flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Photo Ready</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 mt-0.5 truncate">
+                    Ready to save and display on customer menu
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setImageUrl('')}
+                  className="p-2 rounded-xl bg-zinc-800 hover:bg-rose-950 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
+                  title="Remove Photo"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              /* Big Direct Upload Card */
+              <label className="flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-dashed border-amber-500/40 hover:border-amber-400 bg-amber-500/5 hover:bg-amber-500/10 transition-all cursor-pointer text-center group">
+                <Upload className="w-6 h-6 text-amber-400 mb-1 group-hover:scale-110 transition-transform" />
+                <span className="text-xs font-bold text-zinc-100">
+                  {uploading ? 'Compressing & uploading...' : 'Upload Photo from Phone / PC'}
+                </span>
+                <span className="text-[10px] text-zinc-400 mt-0.5">
+                  Tap to select from Gallery or Camera
+                </span>
                 <input
                   type="file"
                   accept="image/*"
@@ -250,82 +255,18 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
                   className="hidden"
                 />
               </label>
-            </div>
+            )}
 
-            {/* OR image URL input */}
-            <div className="mt-2">
+            {/* Optional Direct Web Link */}
+            <div className="pt-1">
               <input
                 type="text"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Or paste image URL (Unsplash or web link)..."
+                placeholder="Or paste direct image URL (https://...)"
                 className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 focus:outline-none focus:border-amber-500"
               />
             </div>
-
-            {/* Image Preview */}
-            {imageUrl && (
-              <div className="mt-3 flex items-center gap-3 p-2 rounded-xl bg-zinc-900 border border-zinc-800">
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  className="w-16 h-16 rounded-lg object-cover border border-white/10"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-                <div className="flex-1 min-w-0">
-                  <span className="text-[11px] text-emerald-400 font-medium block">
-                    ✓ Photo ready
-                  </span>
-                  <span className="text-[10px] text-zinc-400 truncate block">
-                    {imageUrl}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setImageUrl('')}
-                  className="p-1 text-zinc-400 hover:text-white"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-
-            {/* Scanned Gallery Drawer if open */}
-            {showGallery && galleryFiles.length > 0 && (
-              <div className="mt-3 p-3 rounded-xl bg-zinc-900 border border-amber-500/30">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-amber-300">
-                    Select from uploaded folder ({galleryFiles.length} photos)
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowGallery(false)}
-                    className="text-xs text-zinc-400 hover:text-white"
-                  >
-                    Close
-                  </button>
-                </div>
-                <div className="grid grid-cols-4 gap-2 max-h-36 overflow-y-auto no-scrollbar">
-                  {galleryFiles.map((gf) => (
-                    <button
-                      key={gf.filename}
-                      type="button"
-                      onClick={() => {
-                        setImageUrl(gf.url);
-                        setShowGallery(false);
-                      }}
-                      className="group relative rounded-lg overflow-hidden border border-zinc-800 hover:border-amber-500 aspect-square"
-                    >
-                      <img
-                        src={gf.url}
-                        alt={gf.filename}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Form Actions */}
