@@ -1,0 +1,36 @@
+{
+  "name": "hotel-digital-menu",
+  "version": "1.0.0",
+  "description": "Premium Mobile-First QR Digital Menu Card with Google Reviews & Owner Admin Panel",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev:server": "node server/server.js",
+    "dev:client": "cd client && npm run dev",
+    "postinstall": "cd client && npm install",
+    "build:client": "cd client && npm run build",
+    "build": "cd client && npm run build",
+    "test:security": "node security-audit-verify.js"
+  },
+  "keywords": [
+    "restaurant",
+    "qr-menu",
+    "digital-menu",
+    "mobile-first"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.7.3",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "sanitize-html": "^2.18.1",
+    "zod": "^4.6.7"
+  }
+}
