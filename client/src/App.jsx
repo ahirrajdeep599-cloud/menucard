@@ -20,12 +20,26 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Check authentication session via server-side HttpOnly cookie
+  // Check authentication session via server-side HttpOnly cookie or local session
   useEffect(() => {
     const checkSession = async () => {
-      try {
-        await api.verifyToken();
+      if (view !== 'admin') {
+        setCheckingAuth(false);
+        return;
+      }
+
+      setCheckingAuth(true);
+
+      // Check local session flag first
+      if (typeof window !== 'undefined' && localStorage.getItem('dd_admin_auth') === 'true') {
         setIsAuthenticated(true);
+        setCheckingAuth(false);
+        return;
+      }
+
+      try {
+        const res = await api.verifyToken();
+        setIsAuthenticated(Boolean(res && res.authenticated));
       } catch (err) {
         setIsAuthenticated(false);
       } finally {
@@ -34,6 +48,18 @@ export default function App() {
     };
     checkSession();
   }, [view]);
+
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch (e) {
+      // ignore
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('dd_admin_auth');
+    }
+    setIsAuthenticated(false);
+  };
 
   // Listen to hash / popstate changes
   useEffect(() => {
@@ -89,7 +115,7 @@ export default function App() {
 
     return (
       <AdminDashboard
-        onLogout={() => setIsAuthenticated(false)}
+        onLogout={handleLogout}
         onViewCustomerMenu={navigateToCustomer}
       />
     );

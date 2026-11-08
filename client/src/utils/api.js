@@ -32,6 +32,11 @@ async function request(endpoint, options = {}) {
     headers,
   });
 
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error('API server offline (non-JSON response received)');
+  }
+
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
@@ -56,7 +61,13 @@ export const api = {
     }
     return res;
   },
-  verifyToken: () => request('/auth/verify'),
+  verifyToken: async () => {
+    const res = await request('/auth/verify');
+    if (!res || !res.authenticated) {
+      throw new Error('Unauthorized');
+    }
+    return res;
+  },
   logout: async () => {
     try {
       await request('/auth/logout', { method: 'POST' });

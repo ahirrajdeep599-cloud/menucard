@@ -192,54 +192,8 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
             </div>
           </div>
 
-          {/* Veg / Non-Veg Radio Toggle */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-              Food Type *
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setIsVeg(true)}
-                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                  isVeg
-                    ? 'bg-emerald-950/60 border-emerald-500 text-emerald-300'
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
-                }`}
-              >
-                <span className="veg-indicator" />
-                <span>Vegetarian</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsVeg(false)}
-                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                  !isVeg
-                    ? 'bg-rose-950/60 border-rose-500 text-rose-300'
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
-                }`}
-              >
-                <span className="non-veg-indicator" />
-                <span>Non-Veg</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Status Toggles: Bestseller & In Stock */}
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <label className="flex items-center gap-2.5 p-3 rounded-xl bg-zinc-900 border border-zinc-800 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={isBestseller}
-                onChange={(e) => setIsBestseller(e.target.checked)}
-                className="w-4 h-4 accent-amber-500 rounded"
-              />
-              <span className="text-xs font-semibold text-amber-200">
-                Chef's Special ★
-              </span>
-            </label>
-
+          {/* Availability Status Toggle */}
+          <div className="pt-1">
             <label className="flex items-center gap-2.5 p-3 rounded-xl bg-zinc-900 border border-zinc-800 cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -248,7 +202,7 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
                 className="w-4 h-4 accent-emerald-500 rounded"
               />
               <span className="text-xs font-semibold text-zinc-200">
-                {isAvailable ? 'In Stock (Available)' : 'Sold Out'}
+                {isAvailable ? 'In Stock (Available on Menu)' : 'Sold Out (Mark as Unavailable)'}
               </span>
             </label>
           </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
+import defaultMenuData from '../data/defaultMenu.json';
 import QuickPriceTable from './QuickPriceTable';
 import CategoryManager from './CategoryManager';
 import SettingsManager from './SettingsManager';
@@ -29,8 +30,8 @@ import {
 } from 'lucide-react';
 
 export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
-  const [data, setData] = useState({ settings: null, categories: [], items: [] });
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(() => defaultMenuData || { settings: null, categories: [], items: [] });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Tabs: 'dishes' | 'prices' | 'categories' | 'media' | 'qr' | 'logs' | 'settings'
@@ -46,12 +47,12 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
 
   const fetchMenuData = async () => {
     try {
-      setLoading(true);
-      setError(null);
       const res = await api.getMenu();
-      setData(res);
+      if (res && Array.isArray(res.items) && res.items.length > 0) {
+        setData(res);
+      }
     } catch (err) {
-      setError(err.message || 'Failed to load menu data');
+      console.info("Using embedded menu catalog in AdminDashboard");
     } finally {
       setLoading(false);
     }
@@ -263,7 +264,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
             </div>
 
             {/* Quick Stats Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
                 <span className="text-xs text-zinc-400 block">Total Dishes</span>
                 <span className="font-serif text-xl font-bold text-amber-200">
@@ -274,12 +275,6 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
                 <span className="text-xs text-zinc-400 block">Categories</span>
                 <span className="font-serif text-xl font-bold text-amber-200">
                   {data.categories.length}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
-                <span className="text-xs text-zinc-400 block">Chef's Specials</span>
-                <span className="font-serif text-xl font-bold text-amber-400">
-                  {data.items.filter(i => i.isBestseller).length}
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
@@ -307,12 +302,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerMenu }) {
                         onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80'; }}
                       />
                       <div className="absolute top-2 left-2 flex gap-1.5">
-                        <span className={item.isVeg ? 'veg-indicator' : 'non-veg-indicator'} />
-                        {item.isBestseller && (
-                          <span className="bg-amber-500 text-black px-1.5 py-0.5 rounded text-[10px] font-bold">
-                            SPECIAL
-                          </span>
-                        )}
+                        <span className="veg-indicator" />
                       </div>
 
                       {!item.isAvailable && (

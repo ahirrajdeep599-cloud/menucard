@@ -52,12 +52,6 @@ export default function ItemDetailModal({ item, categoryName, currencySymbol = '
 
           {/* Badges Over Image */}
           <div className="absolute bottom-3 left-3 flex items-center gap-2">
-            {isBestseller && (
-              <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-black px-2.5 py-1 rounded-lg text-xs font-extrabold flex items-center gap-1 shadow-md">
-                <Star className="w-3 h-3 fill-black" />
-                <span>CHEF'S SPECIAL</span>
-              </span>
-            )}
             {!isAvailable && (
               <span className="bg-rose-950/90 border border-rose-500/50 text-rose-300 px-2.5 py-1 rounded-lg text-xs font-bold uppercase shadow-md">
                 Temporarily Sold Out
@@ -76,18 +70,12 @@ export default function ItemDetailModal({ item, categoryName, currencySymbol = '
 
           <div className="mt-1 flex items-start gap-2.5">
             <span
-              className={`mt-1 flex-shrink-0 ${isVeg ? 'veg-indicator' : 'non-veg-indicator'}`}
-              title={isVeg ? 'Vegetarian' : 'Non-Vegetarian'}
+              className="mt-1 flex-shrink-0 veg-indicator"
+              title="100% Pure Vegetarian"
             />
             <h2 className="font-serif text-xl sm:text-2xl font-bold text-zinc-100 leading-snug">
               {name}
             </h2>
-          </div>
-
-          <div className="mt-4 p-3.5 rounded-2xl bg-zinc-900/80 border border-white/5">
-            <p className="text-sm sm:text-base text-zinc-300 font-light leading-relaxed">
-              {description || "Prepared fresh to order using finest authentic spices and artisanal culinary techniques."}
-            </p>
           </div>
 
           {/* Price Highlight */}

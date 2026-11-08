@@ -1,7 +1,7 @@
 import React from 'react';
-import { Phone, MessageCircle, MapPin, ChevronDown, Clock, Leaf } from 'lucide-react';
+import { Phone, MessageCircle, MapPin, ChevronDown, Clock, Leaf, Lock } from 'lucide-react';
 
-export default function HeroSection({ settings, onExploreClick }) {
+export default function HeroSection({ settings, onExploreClick, onAdminClick }) {
   const {
     hotelName = "Dining Delight Multicuisine Restaurant",
     tagline = "100% Pure Vegetarian Fine Dining & Exquisite Flavors",
@@ -30,17 +30,30 @@ export default function HeroSection({ settings, onExploreClick }) {
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/65 to-[#08090d]" />
       </div>
 
-      {/* Top Bar with Hours / Pure Veg Badges */}
+      {/* Top Bar with Hours, Pure Veg & Admin Access */}
       <header className="relative z-10 pt-4 px-4 sm:px-6 flex items-center justify-between flex-wrap gap-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-xs font-medium text-amber-300">
           <Clock className="w-3.5 h-3.5 text-amber-400" />
           <span>{openingHours}</span>
         </div>
 
-        {/* 100% PURE VEG HIGHLIGHT */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-400/50 text-xs font-bold text-emerald-300 shadow-md">
-          <span className="veg-indicator scale-90" />
-          <span>100% Pure Vegetarian</span>
+        <div className="flex items-center gap-2">
+          {/* 100% PURE VEG HIGHLIGHT */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-400/50 text-xs font-bold text-emerald-300 shadow-md">
+            <span className="veg-indicator scale-90" />
+            <span>100% Pure Vegetarian</span>
+          </div>
+
+          {/* Discreet Admin Portal Button */}
+          {onAdminClick && (
+            <button
+              onClick={onAdminClick}
+              title="Owner Admin Panel"
+              className="p-1.5 rounded-full bg-black/50 hover:bg-amber-500/20 text-zinc-400 hover:text-amber-300 border border-white/10 transition-colors cursor-pointer"
+            >
+              <Lock className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </header>
 

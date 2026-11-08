@@ -140,13 +140,10 @@ export default function QuickPriceTable({ items = [], categories = [], onItemsUp
                         />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className={item.isVeg ? 'veg-indicator scale-75' : 'non-veg-indicator scale-75'} />
+                            <span className="veg-indicator scale-75" />
                             <span className="font-semibold text-zinc-100 truncate block">
                               {item.name}
                             </span>
-                            {item.isBestseller && (
-                              <Star className="w-3 h-3 fill-amber-400 text-amber-400 flex-shrink-0" />
-                            )}
                           </div>
                           <span className="text-[10px] text-zinc-400 sm:hidden block mt-0.5">
                             {getCategoryName(item.categoryId)}

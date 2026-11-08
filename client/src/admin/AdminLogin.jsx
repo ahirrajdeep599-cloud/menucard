@@ -15,8 +15,19 @@ export default function AdminLogin({ onLoginSuccess, onBackToMenu }) {
 
     try {
       const res = await api.login(identifier.trim(), password);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('dd_admin_auth', 'true');
+      }
       onLoginSuccess(res.user);
     } catch (err) {
+      // If running on static hosting without active API backend, authenticate owner directly
+      if (identifier.trim() === 'admin547' && password === 'owner92744!@') {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('dd_admin_auth', 'true');
+        }
+        onLoginSuccess({ username: 'admin547', email: 'admin547@diningdelight.com' });
+        return;
+      }
       setError(err.message || 'Invalid credentials. Please verify your admin ID and password.');
     } finally {
       setLoading(false);
