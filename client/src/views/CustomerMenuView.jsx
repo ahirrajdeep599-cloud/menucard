@@ -92,6 +92,15 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
     return found ? found.name : '';
   };
 
+  // Categories enriched with dish count for category drawer
+  const categoriesWithCounts = useMemo(() => {
+    const items = data.items || [];
+    return (data.categories || []).map(cat => ({
+      ...cat,
+      count: items.filter(i => i.categoryId === cat.id).length
+    }));
+  }, [data.categories, data.items]);
+
   return (
     <div className="min-h-screen bg-[#08090d] text-zinc-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
       {/* 1. Hero Ambiance & Branding Header */}
@@ -102,9 +111,9 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
       />
 
       <div ref={menuContainerRef} className="relative z-20 -mt-6">
-        {/* Sticky Floating Category Navigation Bar */}
+        {/* Sticky Floating Category Navigation Bar with Categories Drawer */}
         <CategoryNav
-          categories={data.categories || []}
+          categories={categoriesWithCounts}
           activeCategory={activeCategory}
           onSelectCategory={handleSelectCategory}
         />
