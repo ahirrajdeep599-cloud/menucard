@@ -7,11 +7,12 @@ import GoogleReviewSection from '../components/GoogleReviewSection';
 import Footer from '../components/Footer';
 import ItemDetailModal from '../components/ItemDetailModal';
 import { api } from '../utils/api';
+import defaultMenuData from '../data/defaultMenu.json';
 import { Sparkles, UtensilsCrossed, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function CustomerMenuView({ onNavigateAdmin }) {
-  const [data, setData] = useState({ settings: null, categories: [], items: [] });
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(defaultMenuData || { settings: null, categories: [], items: [] });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const [activeCategory, setActiveCategory] = useState('ALL');
@@ -23,13 +24,13 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
 
   const fetchMenu = async () => {
     try {
-      setLoading(true);
-      setError(null);
       const res = await api.getMenu();
-      setData(res);
+      if (res && res.items && res.items.length > 0) {
+        setData(res);
+      }
     } catch (err) {
-      console.error("Failed to load menu:", err);
-      setError("Unable to load digital menu card. Please check your connection.");
+      // Graceful fallback to bundled high-speed static data
+      console.info("Using bundled menu catalog");
     } finally {
       setLoading(false);
     }
