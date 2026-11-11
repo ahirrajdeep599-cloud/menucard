@@ -76,11 +76,15 @@ export default function HeroSection({ settings, onExploreClick, onAdminClick }) 
               <div className="relative p-1.5 rounded-full bg-gradient-to-br from-[#FFF1D0] via-[#D9AD52] to-[#8F6419] shadow-[0_14px_30px_rgba(0,0,0,0.85)]">
                 <div className="rounded-full p-1 bg-[#151515]">
                   <img
-                    src={logoUrl}
+                    src={logoUrl || '/uploads/branding/dining-delight-logo.jpg'}
                     alt={hotelName}
                     className="w-24 h-24 sm:w-32 sm:h-32 object-contain rounded-full bg-[#fffdf7] p-1 shadow-inner"
                     onError={(e) => {
-                      e.target.style.display = 'none';
+                      const fallback = '/uploads/branding/dining-delight-logo.jpg';
+                      if (!e.target.dataset.retried) {
+                        e.target.dataset.retried = '1';
+                        e.target.src = fallback;
+                      }
                     }}
                   />
                 </div>
