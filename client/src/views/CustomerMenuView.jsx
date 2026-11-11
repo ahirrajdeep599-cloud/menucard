@@ -59,12 +59,11 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
       items = items.filter(i => i.categoryId === activeCategory);
     }
 
-    // Search query filter (name or description)
+    // Search query filter (dish name)
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       items = items.filter(i =>
-        (i.name && i.name.toLowerCase().includes(q)) ||
-        (i.description && i.description.toLowerCase().includes(q))
+        (i.name && i.name.toLowerCase().includes(q))
       );
     }
 

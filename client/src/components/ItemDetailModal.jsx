@@ -8,7 +8,6 @@ export default function ItemDetailModal({ item, categoryName, currencySymbol = '
 
   const {
     name,
-    description,
     price,
     categoryId,
     isBestseller = false,
@@ -96,12 +95,6 @@ export default function ItemDetailModal({ item, categoryName, currencySymbol = '
               {name}
             </h2>
           </div>
-
-          {description && (
-            <p className="mt-2.5 text-xs sm:text-sm text-[#FFF1D0]/70 leading-relaxed">
-              {description}
-            </p>
-          )}
 
           {/* Price Highlight & CTA */}
           <div className="mt-5 flex items-center justify-between pt-4 border-t border-[#D9AD52]/20 gap-3">

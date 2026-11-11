@@ -9,7 +9,6 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [price, setPrice] = useState('');
-  const [description, setDescription] = useState('');
   const [isVeg, setIsVeg] = useState(true);
   const [isBestseller, setIsBestseller] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
@@ -24,7 +23,6 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
       setName(item.name || '');
       setCategoryId(item.categoryId || (categories[0]?.id || ''));
       setPrice(item.price !== undefined ? item.price : '');
-      setDescription(item.description || '');
       setIsVeg(item.isVeg !== undefined ? item.isVeg : true);
       setIsBestseller(Boolean(item.isBestseller));
       setIsAvailable(item.isAvailable !== false);
@@ -76,7 +74,6 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
       name: name.trim(),
       categoryId,
       price: Number(price),
-      description: description.trim(),
       isVeg,
       isBestseller,
       isAvailable,
@@ -189,20 +186,6 @@ export default function ItemModal({ item, categories = [], onClose, onSave }) {
                 {isAvailable ? 'In Stock (Available on Menu)' : 'Sold Out (Mark as Unavailable)'}
               </span>
             </label>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-300 mb-1">
-              Short Appetizing Description
-            </label>
-            <textarea
-              rows={2}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Charcoal grilled cottage cheese cubes in saffron hung curd marinade..."
-              className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:outline-none focus:border-amber-500"
-            />
           </div>
 
           {/* Direct Photo Upload & URL Section */}
