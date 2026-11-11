@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import HeroSection from '../components/HeroSection';
 import CategoryNav from '../components/CategoryNav';
 import SearchBarAndFilters from '../components/SearchBarAndFilters';
@@ -21,7 +21,7 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
 
   const menuContainerRef = useRef(null);
 
-  const fetchMenu = async () => {
+  const fetchMenu = useCallback(async () => {
     try {
       const res = await api.getMenu();
       if (res && res.items && res.items.length > 0) {
@@ -33,7 +33,7 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchMenu();
@@ -48,7 +48,7 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
-  }, []);
+  }, [fetchMenu]);
 
   // Filter items based on activeCategory and searchQuery
   const filteredItems = useMemo(() => {
@@ -59,11 +59,12 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
       items = items.filter(i => i.categoryId === activeCategory);
     }
 
-    // Search query filter (name)
+    // Search query filter (name or description)
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      items = items.filter(i => 
-        (i.name && i.name.toLowerCase().includes(q))
+      items = items.filter(i =>
+        (i.name && i.name.toLowerCase().includes(q)) ||
+        (i.description && i.description.toLowerCase().includes(q))
       );
     }
 
@@ -87,23 +88,23 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
       .filter((sec) => sec.items.length > 0);
   }, [data.categories, data.items, activeCategory, searchQuery]);
 
-  const handleSelectCategory = (catId) => {
+  const handleSelectCategory = useCallback((catId) => {
     setActiveCategory(catId);
     if (menuContainerRef.current) {
-      const offsetTop = menuContainerRef.current.offsetTop - 80;
+      const offsetTop = menuContainerRef.current.offsetTop - 20;
       window.scrollTo({
         top: offsetTop > 0 ? offsetTop : 0,
         behavior: 'smooth'
       });
     }
-  };
+  }, []);
 
-  const getCategoryName = (catId) => {
+  const getCategoryName = useCallback((catId) => {
     const found = (data.categories || []).find(c => c.id === catId);
     return found ? found.name : '';
-  };
+  }, [data.categories]);
 
-  // Categories enriched with dish count for category drawer
+  // Categories enriched with dish count for category drawer & tabs
   const categoriesWithCounts = useMemo(() => {
     const items = data.items || [];
     return (data.categories || []).map(cat => ({
@@ -113,93 +114,97 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
   }, [data.categories, data.items]);
 
   return (
-    <div className="min-h-screen bg-[#08090d] text-zinc-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
-      {/* 1. Hero Ambiance & Branding Header */}
+    <div className="min-h-screen bg-[#090909] text-[#FFF1D0] flex flex-col selection:bg-[#D9AD52]/30 selection:text-[#FFF1D0]">
+      {/* 1. Luxury 3D Hero Showcase (Original Background & Logo Preserved) */}
       <HeroSection
         settings={data.settings}
         onExploreClick={() => handleSelectCategory('ALL')}
         onAdminClick={onNavigateAdmin}
       />
 
-      <div ref={menuContainerRef} className="relative z-20 -mt-6">
-        {/* Sticky Floating Category Navigation Bar with Categories Drawer */}
+      <div ref={menuContainerRef} className="relative z-20 -mt-4">
+        {/* Sticky Floating Glass Navigation Bar */}
         <CategoryNav
           categories={categoriesWithCounts}
           activeCategory={activeCategory}
           onSelectCategory={handleSelectCategory}
         />
 
-        {/* Clean Search Bar & 100% Pure Veg Counter */}
+        {/* Glass Search Bar & Pure Veg Info */}
         <SearchBarAndFilters
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           totalResults={filteredItems.length}
         />
 
-        {/* Menu Cards Display (2-column grid on mobile!) */}
-        <main className="max-w-4xl mx-auto px-3 sm:px-6 py-4 w-full">
+        {/* Menu Cards Display (2-column luxury grid on mobile) */}
+        <main className="max-w-5xl mx-auto px-3 sm:px-6 py-4 w-full">
           {loading ? (
             /* Skeleton Loader */
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <div key={n} className="p-3 rounded-2xl glass-panel animate-pulse flex flex-col gap-2">
-                  <div className="w-full aspect-square rounded-xl bg-zinc-800" />
-                  <div className="h-4 bg-zinc-800 rounded w-3/4" />
-                  <div className="h-4 bg-zinc-800 rounded w-1/3" />
+                  <div className="w-full aspect-square rounded-xl bg-[#1e1e22]" />
+                  <div className="h-4 bg-[#1e1e22] rounded w-3/4" />
+                  <div className="h-4 bg-[#1e1e22] rounded w-1/3" />
                 </div>
               ))}
             </div>
           ) : error ? (
             <div className="my-12 p-6 rounded-2xl glass-panel border border-rose-500/30 text-center max-w-md mx-auto">
               <AlertCircle className="w-10 h-10 text-rose-400 mx-auto mb-2" />
-              <p className="text-zinc-200 text-sm">{error}</p>
+              <p className="text-[#FFF1D0] text-sm">{error}</p>
               <button
                 onClick={fetchMenu}
-                className="mt-4 px-4 py-2 rounded-xl bg-rose-600/30 text-rose-300 text-xs font-semibold hover:bg-rose-600/40 inline-flex items-center gap-1.5"
+                className="mt-4 px-4 py-2 rounded-xl bg-rose-600/30 text-rose-300 text-xs font-semibold hover:bg-rose-600/40 inline-flex items-center gap-1.5 cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Retry</span>
               </button>
             </div>
           ) : filteredItems.length === 0 ? (
-            /* No Results State */
-            <div className="my-16 text-center py-12 rounded-3xl glass-panel border border-white/5">
-              <UtensilsCrossed className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
-              <h3 className="font-serif text-lg font-bold text-zinc-300">No dishes match your selection</h3>
-              <p className="text-xs text-zinc-400 mt-1">Try another category or clear your search terms.</p>
+            /* Empty Search / Filter State */
+            <div className="my-16 text-center py-12 px-4 rounded-3xl glass-panel border border-[#D9AD52]/20 animate-fade-in">
+              <UtensilsCrossed className="w-12 h-12 text-[#D9AD52]/60 mx-auto mb-3" />
+              <h3 className="font-serif text-lg font-bold text-[#FFF1D0]">No dishes match your selection</h3>
+              <p className="text-xs text-[#FFF1D0]/60 mt-1">Try another category or clear your search terms.</p>
               <button
                 onClick={() => {
                   setActiveCategory('ALL');
                   setSearchQuery('');
                 }}
-                className="mt-4 px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 border border-amber-500/30 transition-all cursor-pointer"
+                className="mt-5 px-5 py-2.5 rounded-xl bg-[#D9AD52]/20 text-[#FFB91F] text-xs font-bold hover:bg-[#D9AD52]/30 border border-[#D9AD52]/40 transition-all cursor-pointer active:scale-95"
               >
                 View Full Menu
               </button>
             </div>
           ) : categorySections ? (
             /* Grouped View by Category Sections */
-            <div className="space-y-10">
+            <div className="space-y-11 animate-fade-in">
               {categorySections.map((sec) => (
-                <section key={sec.id} className="space-y-3.5">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
-                    <h2 className="font-serif text-base sm:text-xl font-bold text-amber-200 tracking-wide flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-amber-400" />
-                      <span>{sec.name}</span>
-                    </h2>
-                    <span className="text-xs text-zinc-400 font-medium">
-                      {sec.items.length} dishes
-                    </span>
+                <section key={sec.id} className="space-y-4">
+                  {/* Animated Section Header Separator */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <h2 className="font-serif text-base sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF1D0] via-[#F3D188] to-[#D9AD52] tracking-wide flex items-center gap-2 min-w-0">
+                        <Sparkles className="w-4 h-4 text-[#FFB91F] flex-shrink-0" />
+                        <span className="truncate">{sec.name}</span>
+                      </h2>
+                      <span className="flex-shrink-0 text-[11px] px-2.5 py-0.5 rounded-full bg-[#151515] border border-[#D9AD52]/25 text-[#D9AD52] font-semibold">
+                        {sec.items.length} {sec.items.length === 1 ? 'dish' : 'dishes'}
+                      </span>
+                    </div>
+                    <div className="gold-divider w-full" />
                   </div>
 
-                  {/* 2 items per row on mobile! */}
+                  {/* 2 items per row on mobile, 3 on tablet, 4 on desktop */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4">
                     {sec.items.map((item) => (
                       <MenuItemCard
                         key={item.id}
                         item={item}
                         currencySymbol={data.settings?.currencySymbol || '₹'}
-                        onItemClick={(it) => setSelectedItem(it)}
+                        onItemClick={setSelectedItem}
                       />
                     ))}
                   </div>
@@ -207,34 +212,54 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
               ))}
             </div>
           ) : (
-            /* Flattened Grid (When filtering or inside specific category) */
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4">
-              {filteredItems.map((item) => (
-                <MenuItemCard
-                  key={item.id}
-                  item={item}
-                  currencySymbol={data.settings?.currencySymbol || '₹'}
-                  onItemClick={(it) => setSelectedItem(it)}
-                />
-              ))}
+            /* Flattened Grid (When searching or viewing single category) */
+            <div className="space-y-4 animate-fade-in">
+              {activeCategory !== 'ALL' && !searchQuery.trim() && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="font-serif text-base sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF1D0] via-[#F3D188] to-[#D9AD52] tracking-wide flex items-center gap-2 min-w-0">
+                      <Sparkles className="w-4 h-4 text-[#FFB91F] flex-shrink-0" />
+                      <span className="truncate">{getCategoryName(activeCategory)}</span>
+                    </h2>
+                    <span className="flex-shrink-0 text-[11px] px-2.5 py-0.5 rounded-full bg-[#151515] border border-[#D9AD52]/25 text-[#D9AD52] font-semibold">
+                      {filteredItems.length} {filteredItems.length === 1 ? 'dish' : 'dishes'}
+                    </span>
+                  </div>
+                  <div className="gold-divider w-full" />
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4">
+                {filteredItems.map((item) => (
+                  <MenuItemCard
+                    key={item.id}
+                    item={item}
+                    currencySymbol={data.settings?.currencySymbol || '₹'}
+                    onItemClick={setSelectedItem}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </main>
 
-        {/* 3. Google Review Section (Directly Below Menu) */}
+        {/* 3. Google Review Loyalty Section */}
         <GoogleReviewSection
           googleReviewUrl={data.settings?.googleReviewUrl}
           hotelName={data.settings?.hotelName}
+          settings={data.settings}
+          totalDishes={(data.items || []).length}
+          totalCategories={(data.categories || []).length}
         />
 
-        {/* 4. Footer */}
+        {/* 4. Luxury Footer */}
         <Footer
           settings={data.settings}
           onAdminClick={onNavigateAdmin}
         />
       </div>
 
-      {/* Item Detail Lightbox Modal */}
+      {/* Dish Detail Modal */}
       {selectedItem && (
         <ItemDetailModal
           item={selectedItem}
