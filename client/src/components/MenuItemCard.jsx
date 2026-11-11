@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Utensils, Award } from 'lucide-react';
+import { Utensils, Award, Plus, Minus } from 'lucide-react';
 
 function DishThumbnail({ imageUrl, name }) {
   const [imageError, setImageError] = useState(false);
@@ -41,8 +41,15 @@ function DishThumbnail({ imageUrl, name }) {
   );
 }
 
-function MenuItemCard({ item, currencySymbol = '₹', onItemClick }) {
+function MenuItemCard({
+  item,
+  currencySymbol = '₹',
+  quantity = 0,
+  onUpdateQuantity,
+  onItemClick
+}) {
   const {
+    id,
     name,
     price,
     categoryId,
@@ -55,12 +62,22 @@ function MenuItemCard({ item, currencySymbol = '₹', onItemClick }) {
     Boolean(isBestseller) ||
     categoryId === 'cat-chef-special';
 
+  const handleAdd = (e) => {
+    e.stopPropagation();
+    if (onUpdateQuantity) onUpdateQuantity(id, quantity + 1);
+  };
+
+  const handleDecrement = (e) => {
+    e.stopPropagation();
+    if (onUpdateQuantity) onUpdateQuantity(id, Math.max(0, quantity - 1));
+  };
+
   return (
     <article
       onClick={() => onItemClick && onItemClick(item)}
       className={`menu-card-3d relative group flex flex-col justify-between p-2.5 sm:p-3.5 rounded-2xl cursor-pointer overflow-hidden ${
-        !isAvailable ? 'opacity-65 grayscale-[40%]' : ''
-      }`}
+        quantity > 0 ? 'border-[#FFB91F]/55' : ''
+      } ${!isAvailable ? 'opacity-65 grayscale-[40%]' : ''}`}
     >
       {/* Subtle Top Champagne Highlight Line on Hover */}
       <div className="pointer-events-none absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-[#FFB91F]/0 group-hover:via-[#FFB91F]/70 to-transparent transition-all duration-300" />
@@ -95,23 +112,60 @@ function MenuItemCard({ item, currencySymbol = '₹', onItemClick }) {
         )}
       </div>
 
-      {/* Dish Name & Price */}
+      {/* Dish Name, Price & Add/Stepper Button */}
       <div className="mt-2.5 sm:mt-3 flex-1 flex flex-col justify-between">
         <h3 className="font-sans font-bold text-xs sm:text-sm text-[#FFF1D0] group-hover:text-[#FFB91F] transition-colors leading-snug line-clamp-2 min-h-[2.1rem]">
           {name}
         </h3>
 
-        <div className="mt-2 pt-2 border-t border-[#D9AD52]/15 flex items-center justify-between">
-          <div className="flex items-baseline gap-0.5">
+        <div className="mt-2.5 pt-2 border-t border-[#D9AD52]/15 flex items-center justify-between gap-1.5">
+          {/* Golden Price */}
+          <div className="flex items-baseline gap-0.5 min-w-0">
             <span className="text-xs text-[#D9AD52] font-bold">{currencySymbol}</span>
             <span className="font-sans text-sm sm:text-base font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF1D0] via-[#FFB91F] to-[#D9AD52] tracking-tight">
               {price}
             </span>
           </div>
 
-          <span className="text-[10px] text-[#D9AD52]/60 group-hover:text-[#FFB91F] font-medium transition-colors hidden sm:inline">
-            View ›
-          </span>
+          {/* Add (+) or Active Quantity Stepper (- qty +) */}
+          {isAvailable && (
+            quantity > 0 ? (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center rounded-xl bg-gradient-to-r from-[#D9AD52] to-[#FFB91F] text-[#090909] shadow-[0_4px_12px_rgba(255,185,31,0.3)] flex-shrink-0 overflow-hidden"
+              >
+                <button
+                  type="button"
+                  onClick={handleDecrement}
+                  aria-label={`Decrease quantity of ${name}`}
+                  className="px-2 py-1.5 hover:bg-black/10 active:bg-black/20 transition-colors cursor-pointer"
+                >
+                  <Minus className="w-3.5 h-3.5 stroke-[2.75]" />
+                </button>
+                <span className="px-1.5 text-xs font-black min-w-[1.2rem] text-center select-none">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleAdd}
+                  aria-label={`Increase quantity of ${name}`}
+                  className="px-2 py-1.5 hover:bg-black/10 active:bg-black/20 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[2.75]" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleAdd}
+                aria-label={`Add ${name} to cart`}
+                className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#090909] hover:bg-gradient-to-r hover:from-[#D9AD52] hover:to-[#FFB91F] text-[#FFB91F] hover:text-[#090909] border border-[#D9AD52]/45 hover:border-transparent text-[11px] sm:text-xs font-extrabold transition-all active:scale-95 flex-shrink-0 cursor-pointer shadow-sm"
+              >
+                <span>Add</span>
+                <Plus className="w-3.5 h-3.5 stroke-[2.75]" />
+              </button>
+            )
+          )}
         </div>
       </div>
     </article>

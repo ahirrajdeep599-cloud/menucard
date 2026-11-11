@@ -6,9 +6,32 @@ import MenuItemCard from '../components/MenuItemCard';
 import GoogleReviewSection from '../components/GoogleReviewSection';
 import Footer from '../components/Footer';
 import ItemDetailModal from '../components/ItemDetailModal';
+import CartModal from '../components/CartModal';
+import WaiterOrderModal from '../components/WaiterOrderModal';
 import { api } from '../utils/api';
 import defaultMenuData from '../data/defaultMenu.json';
-import { Sparkles, UtensilsCrossed, AlertCircle, RefreshCw } from 'lucide-react';
+import { Sparkles, UtensilsCrossed, AlertCircle, RefreshCw, ShoppingCart } from 'lucide-react';
+
+const CART_STORAGE_KEY = 'dd_waiter_cart';
+
+function loadInitialCart() {
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const cleaned = {};
+    for (const [id, qty] of Object.entries(parsed)) {
+      const n = Number(qty);
+      if (Number.isInteger(n) && n > 0) {
+        cleaned[id] = n;
+      }
+    }
+    return cleaned;
+  } catch {
+    return {};
+  }
+}
 
 export default function CustomerMenuView({ onNavigateAdmin }) {
   const [data, setData] = useState(defaultMenuData || { settings: null, categories: [], items: [] });
@@ -19,7 +42,26 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
 
+  const [cart, setCart] = useState(loadInitialCart);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [showWaiterModal, setShowWaiterModal] = useState(false);
+
   const menuContainerRef = useRef(null);
+
+  const currencySymbol = data.settings?.currencySymbol || '₹';
+
+  // Persist customer dish selection locally (never submitted to Firebase)
+  useEffect(() => {
+    try {
+      if (Object.keys(cart).length === 0) {
+        window.localStorage.removeItem(CART_STORAGE_KEY);
+      } else {
+        window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+      }
+    } catch {
+      // Ignore storage quota / private mode errors
+    }
+  }, [cart]);
 
   const fetchMenu = useCallback(async () => {
     try {
@@ -49,6 +91,55 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
   }, [fetchMenu]);
+
+  const handleUpdateQuantity = useCallback((itemId, nextQuantity) => {
+    setCart((prev) => {
+      const qty = Math.floor(Number(nextQuantity) || 0);
+      if (qty <= 0) {
+        if (!(itemId in prev)) return prev;
+        const next = { ...prev };
+        delete next[itemId];
+        return next;
+      }
+      return { ...prev, [itemId]: qty };
+    });
+  }, []);
+
+  const handleRemoveItem = useCallback((itemId) => {
+    setCart((prev) => {
+      if (!(itemId in prev)) return prev;
+      const next = { ...prev };
+      delete next[itemId];
+      return next;
+    });
+  }, []);
+
+  const handleClearCart = useCallback(() => {
+    setCart({});
+  }, []);
+
+  // Derive cart items & totals from live menu catalog
+  const { cartItems, totalCartItems, totalCartPrice } = useMemo(() => {
+    const itemsById = new Map((data.items || []).map((item) => [item.id, item]));
+    const resolved = [];
+    let count = 0;
+    let total = 0;
+
+    for (const [itemId, qty] of Object.entries(cart)) {
+      const item = itemsById.get(itemId);
+      if (!item || item.isAvailable === false) continue;
+      const numericPrice = Number(item.price) || 0;
+      resolved.push({ item, quantity: qty });
+      count += qty;
+      total += numericPrice * qty;
+    }
+
+    return {
+      cartItems: resolved,
+      totalCartItems: count,
+      totalCartPrice: total
+    };
+  }, [cart, data.items]);
 
   // Filter items based on activeCategory and searchQuery
   const filteredItems = useMemo(() => {
@@ -113,7 +204,11 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
   }, [data.categories, data.items]);
 
   return (
-    <div className="min-h-screen bg-[#090909] text-[#FFF1D0] flex flex-col selection:bg-[#D9AD52]/30 selection:text-[#FFF1D0]">
+    <div
+      className={`min-h-screen bg-[#090909] text-[#FFF1D0] flex flex-col selection:bg-[#D9AD52]/30 selection:text-[#FFF1D0] ${
+        totalCartItems > 0 ? 'pb-24' : ''
+      }`}
+    >
       {/* 1. Luxury 3D Hero Showcase (Original Background & Logo Preserved) */}
       <HeroSection
         settings={data.settings}
@@ -202,7 +297,9 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
                       <MenuItemCard
                         key={item.id}
                         item={item}
-                        currencySymbol={data.settings?.currencySymbol || '₹'}
+                        currencySymbol={currencySymbol}
+                        quantity={cart[item.id] || 0}
+                        onUpdateQuantity={handleUpdateQuantity}
                         onItemClick={setSelectedItem}
                       />
                     ))}
@@ -233,7 +330,9 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
                   <MenuItemCard
                     key={item.id}
                     item={item}
-                    currencySymbol={data.settings?.currencySymbol || '₹'}
+                    currencySymbol={currencySymbol}
+                    quantity={cart[item.id] || 0}
+                    onUpdateQuantity={handleUpdateQuantity}
                     onItemClick={setSelectedItem}
                   />
                 ))}
@@ -258,13 +357,69 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
         />
       </div>
 
+      {/* Floating Bottom View Cart Button (visible only when >= 1 item selected) */}
+      {totalCartItems > 0 && !showCartModal && !showWaiterModal && (
+        <div className="fixed bottom-4 inset-x-0 z-40 px-4 flex justify-center pointer-events-none animate-slide-up">
+          <button
+            type="button"
+            onClick={() => setShowCartModal(true)}
+            className="pointer-events-auto btn-gold-3d w-full max-w-md flex items-center justify-between gap-3 px-5 py-3.5 rounded-2xl shadow-[0_14px_38px_rgba(0,0,0,0.85),0_0_24px_rgba(255,185,31,0.35)] border border-[#FFF1D0]/40 cursor-pointer"
+          >
+            <span className="inline-flex items-center gap-2.5 font-extrabold text-sm sm:text-base tracking-wide">
+              <ShoppingCart className="w-5 h-5 stroke-[2.4] flex-shrink-0" />
+              <span>
+                View Cart ({totalCartItems} {totalCartItems === 1 ? 'Item' : 'Items'})
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-2 font-black text-sm sm:text-base tabular-nums border-l border-[#090909]/25 pl-3">
+              {currencySymbol}{totalCartPrice}
+            </span>
+          </button>
+        </div>
+      )}
+
       {/* Dish Detail Modal */}
       {selectedItem && (
         <ItemDetailModal
           item={selectedItem}
           categoryName={getCategoryName(selectedItem.categoryId)}
-          currencySymbol={data.settings?.currencySymbol || '₹'}
+          currencySymbol={currencySymbol}
+          quantity={cart[selectedItem.id] || 0}
+          onUpdateQuantity={handleUpdateQuantity}
           onClose={() => setSelectedItem(null)}
+        />
+      )}
+
+      {/* Cart Drawer / Modal */}
+      {showCartModal && (
+        <CartModal
+          cartItems={cartItems}
+          totalItems={totalCartItems}
+          totalPrice={totalCartPrice}
+          currencySymbol={currencySymbol}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemoveItem={handleRemoveItem}
+          onClearCart={handleClearCart}
+          onClose={() => setShowCartModal(false)}
+          onShowToWaiter={() => {
+            setShowCartModal(false);
+            setShowWaiterModal(true);
+          }}
+        />
+      )}
+
+      {/* Full-Screen Show-to-Waiter Digital Slip */}
+      {showWaiterModal && (
+        <WaiterOrderModal
+          cartItems={cartItems}
+          totalItems={totalCartItems}
+          totalPrice={totalCartPrice}
+          currencySymbol={currencySymbol}
+          settings={data.settings}
+          onBackToCart={() => {
+            setShowWaiterModal(false);
+            setShowCartModal(true);
+          }}
         />
       )}
     </div>

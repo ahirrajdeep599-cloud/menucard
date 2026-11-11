@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { X, Utensils, Award } from 'lucide-react';
+import { X, Utensils, Award, Plus, Minus } from 'lucide-react';
 
-export default function ItemDetailModal({ item, categoryName, currencySymbol = '₹', onClose }) {
+export default function ItemDetailModal({
+  item,
+  categoryName,
+  currencySymbol = '₹',
+  quantity = 0,
+  onUpdateQuantity,
+  onClose
+}) {
   const [imageError, setImageError] = useState(false);
 
   if (!item) return null;
@@ -97,7 +104,7 @@ export default function ItemDetailModal({ item, categoryName, currencySymbol = '
           </div>
 
           {/* Price Highlight & CTA */}
-          <div className="mt-5 flex items-center justify-between pt-4 border-t border-[#D9AD52]/20 gap-3">
+          <div className="mt-5 flex flex-wrap items-center justify-between pt-4 border-t border-[#D9AD52]/20 gap-3">
             <div>
               <span className="text-[11px] text-[#FFF1D0]/55 uppercase tracking-wider block">Price</span>
               <div className="flex items-baseline gap-1 mt-0.5">
@@ -108,12 +115,50 @@ export default function ItemDetailModal({ item, categoryName, currencySymbol = '
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="px-5 py-2.5 rounded-xl bg-[#090909] hover:bg-[#1f1f22] border border-[#D9AD52]/35 hover:border-[#FFB91F]/70 text-[#FFF1D0] text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer"
-            >
-              Back to Menu
-            </button>
+            <div className="flex items-center gap-2 ml-auto">
+              {isAvailable !== false && onUpdateQuantity && (
+                quantity > 0 ? (
+                  <div className="inline-flex items-center rounded-xl bg-gradient-to-r from-[#FFB91F] to-[#D9AD52] p-0.5 shadow-lg shadow-[#D9AD52]/20">
+                    <button
+                      type="button"
+                      onClick={() => onUpdateQuantity(item.id, quantity - 1)}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-[#090909] hover:bg-[#090909]/10 active:scale-90 transition-all cursor-pointer"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="w-4 h-4 stroke-[2.6]" />
+                    </button>
+                    <span className="min-w-[26px] text-center text-sm font-black text-[#090909] tabular-nums">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onUpdateQuantity(item.id, quantity + 1)}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-[#090909] hover:bg-[#090909]/10 active:scale-90 transition-all cursor-pointer"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="w-4 h-4 stroke-[2.6]" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onUpdateQuantity(item.id, 1)}
+                    className="btn-gold-3d inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4 stroke-[2.6]" />
+                    <span>Add</span>
+                  </button>
+                )
+              )}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-xl bg-[#090909] hover:bg-[#1f1f22] border border-[#D9AD52]/35 hover:border-[#FFB91F]/70 text-[#FFF1D0] text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer"
+              >
+                Back to Menu
+              </button>
+            </div>
           </div>
         </div>
       </div>
