@@ -50,6 +50,55 @@
     <!-- Privacy & Referrer Policy -->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
 
+    <!-- Schema.org JSON-LD Structured Data for Google Restaurant Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Restaurant",
+      "name": "Dining Delight Multicuisine Restaurant",
+      "image": "https://diningdelightmulticusine.netlify.app/uploads/branding/dining-delight-ambiance.jpg",
+      "logo": "https://diningdelightmulticusine.netlify.app/uploads/branding/dining-delight-logo.jpg",
+      "url": "https://diningdelightmulticusine.netlify.app/",
+      "telephone": "+91 98765 43210",
+      "servesCuisine": [
+        "Vegetarian",
+        "North Indian",
+        "Gujarati",
+        "Chinese",
+        "Continental"
+      ],
+      "priceRange": "₹₹",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Rajkot",
+        "addressRegion": "Gujarat",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "22.3039",
+        "longitude": "70.8022"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ],
+          "opens": "11:00",
+          "closes": "23:00"
+        }
+      ],
+      "hasMenu": "https://diningdelightmulticusine.netlify.app/"
+    }
+    </script>
+
     <!-- Google Fonts: Playfair Display (Luxury Serif) & Plus Jakarta Sans (Clean Modern Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -7,3 +7,6 @@ Disallow: /api/*
 # Allow public customer menu
 Allow: /
 Allow: /uploads/
+
+# Sitemap location for Google Search Console
+Sitemap: https://diningdelightmulticusine.netlify.app/sitemap.xml
