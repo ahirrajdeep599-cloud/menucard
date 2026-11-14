@@ -142,17 +142,11 @@ export default function HeroSection({ settings, onExploreClick }) {
             "{tagline}"
           </p>
 
-          {/* Location & Rajkot's Best Various Menu Badges */}
+          {/* Location Badge */}
           <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2 text-[11px] sm:text-xs">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#090909]/80 border border-[#D9AD52]/30 text-[#FFF1D0]/90">
               <MapPin className="w-3.5 h-3.5 text-[#FFB91F] flex-shrink-0" />
               <span>Rajkot, Gujarat</span>
-            </span>
-
-            {/* Requested: Rajkot Best Various Menu Restaurant */}
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#D9AD52]/20 via-[#FFB91F]/15 to-[#D9AD52]/20 border border-[#FFB91F]/45 text-[#FFF1D0] font-semibold shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-[#FFB91F] flex-shrink-0" />
-              <span>Rajkot's Best Various Menu Restaurant</span>
             </span>
           </div>
 
