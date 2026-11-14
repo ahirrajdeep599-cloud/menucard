@@ -1,22 +1,29 @@
 import React from 'react';
-import { Phone, MessageCircle, MapPin, ChevronDown, Clock, Lock, Sparkles } from 'lucide-react';
+import { Phone, MessageCircle, MapPin, ChevronDown, Clock, Sparkles, Star } from 'lucide-react';
 
-export default function HeroSection({ settings, onExploreClick, onAdminClick }) {
+const OFFICIAL_GOOGLE_REVIEW_URL = "https://reviews.to/dining-delight";
+
+export default function HeroSection({ settings, onExploreClick }) {
   const {
     hotelName = "Dining Delight Multicuisine Restaurant",
     tagline = "100% Pure Vegetarian Fine Dining & Exquisite Flavors",
     phone = "09428925716",
     whatsapp = "+919428925716",
     address = "Bhavana Society, opp. Viral Vatika, near Shital Park Road, Puneet Nagar, Bajrang Wadi, Rajkot, Gujarat 360006",
-    googleMapsUrl = "https://maps.app.goo.gl/YKQURwjkkjW7NJur9",
+    googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=Dining+Delight+Multicuisine+Restaurant+Rajkot",
+    googleReviewUrl,
     logoUrl = "/uploads/branding/dining-delight-logo.jpg",
     heroBgUrl = "/uploads/branding/dining-delight-ambiance.jpg",
     openingHours = "11:00 AM – 3:30 PM, 7:00 PM – 12:30 AM",
+    googleRating = "4.9",
   } = settings || {};
 
   const cleanPhone = phone.replace(/[^0-9+]/g, '');
   const cleanWa = whatsapp.replace(/[^0-9]/g, '');
   const bgImageSrc = heroBgUrl || '/uploads/branding/dining-delight-ambiance.jpg';
+  const targetReviewUrl = (googleReviewUrl && googleReviewUrl.trim().length > 10)
+    ? googleReviewUrl.trim()
+    : OFFICIAL_GOOGLE_REVIEW_URL;
 
   return (
     <section className="relative w-full overflow-hidden min-h-[78vh] md:min-h-[85vh] flex flex-col justify-between bg-[#090909]">
@@ -41,23 +48,24 @@ export default function HeroSection({ settings, onExploreClick, onAdminClick }) 
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
+          {/* Top Header Review Quick Link */}
+          <a
+            href={targetReviewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Review Dining Delight on Google (4.9 ★)"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#D9AD52]/25 to-[#FFB91F]/20 hover:from-[#D9AD52]/40 hover:to-[#FFB91F]/35 backdrop-blur-md border border-[#FFB91F]/50 text-[11px] sm:text-xs font-bold text-[#FFF1D0] shadow-lg active:scale-95 transition-all cursor-pointer"
+          >
+            <Star className="w-3.5 h-3.5 text-[#FFB91F] fill-[#FFB91F]" />
+            <span>Review</span>
+            <span className="text-[#FFB91F] font-black">{googleRating} ★</span>
+          </a>
+
           {/* 100% PURE VEG HIGHLIGHT */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-950/75 backdrop-blur-md border border-emerald-400/40 text-[11px] sm:text-xs font-bold text-emerald-300 shadow-lg">
             <span className="veg-indicator scale-90" />
             <span>100% Pure Veg</span>
           </div>
-
-          {/* Accessible Admin Portal Button */}
-          {onAdminClick && (
-            <button
-              onClick={onAdminClick}
-              title="Admin Panel Login"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#151515]/85 hover:bg-[#D9AD52]/20 text-[#D9AD52] hover:text-[#FFF1D0] border border-[#D9AD52]/40 text-[11px] sm:text-xs font-semibold shadow-lg active:scale-95 transition-all cursor-pointer backdrop-blur-md"
-            >
-              <Lock className="w-3 h-3 text-[#FFB91F]" />
-              <span>Admin</span>
-            </button>
-          )}
         </div>
       </header>
 
@@ -96,6 +104,27 @@ export default function HeroSection({ settings, onExploreClick, onAdminClick }) 
             </div>
           )}
 
+          {/* 4.9 Rating Badge Out of 5 */}
+          <a
+            href={targetReviewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Rated 4.9 out of 5 on Google Reviews"
+            className="mb-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#090909]/85 hover:bg-[#1a1a1d] border border-[#FFB91F]/50 shadow-[0_4px_16px_rgba(255,185,31,0.2)] transition-all active:scale-95 cursor-pointer group"
+          >
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star key={star} className="w-3.5 h-3.5 text-[#FFB91F] fill-[#FFB91F]" />
+              ))}
+            </div>
+            <span className="font-extrabold text-xs sm:text-sm text-[#FFF1D0]">
+              <strong className="text-[#FFB91F] font-black">{googleRating}</strong> / 5 Rating
+            </span>
+            <span className="text-[10px] text-[#D9AD52] uppercase tracking-wider font-bold border-l border-[#D9AD52]/35 pl-2">
+              Google Reviews
+            </span>
+          </a>
+
           {/* Restaurant Name with Luxury Typography */}
           <h1 className="font-cinzel text-2xl sm:text-4xl md:text-[2.6rem] font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-[#FFF1D0] via-[#F2D184] to-[#D9AD52] tracking-wide leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)]">
             {hotelName}
@@ -113,15 +142,21 @@ export default function HeroSection({ settings, onExploreClick, onAdminClick }) 
             "{tagline}"
           </p>
 
-          {/* Location & Fine Dining Badges */}
+          {/* Location & Rajkot's Best Various Menu Badges */}
           <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2 text-[11px] sm:text-xs">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#090909]/70 border border-[#D9AD52]/25 text-[#FFF1D0]/90">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#090909]/80 border border-[#D9AD52]/30 text-[#FFF1D0]/90">
               <MapPin className="w-3.5 h-3.5 text-[#FFB91F] flex-shrink-0" />
               <span>Rajkot, Gujarat</span>
             </span>
+
+            {/* Requested: Rajkot Best Various Menu Restaurant */}
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#D9AD52]/20 via-[#FFB91F]/15 to-[#D9AD52]/20 border border-[#FFB91F]/45 text-[#FFF1D0] font-semibold shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-[#FFB91F] flex-shrink-0" />
+              <span>Rajkot's Best Various Menu Restaurant</span>
+            </span>
           </div>
 
-          {/* Quick 3D Action Pills: Call / WhatsApp / Location */}
+          {/* Quick 3D Action Pills: Call / WhatsApp / Location / Review */}
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 w-full">
             {phone && (
               <a

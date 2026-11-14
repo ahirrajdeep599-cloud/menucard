@@ -213,7 +213,6 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
       <HeroSection
         settings={data.settings}
         onExploreClick={() => handleSelectCategory('ALL')}
-        onAdminClick={onNavigateAdmin}
       />
 
       <div ref={menuContainerRef} className="relative z-20 -mt-4">
@@ -353,7 +352,6 @@ export default function CustomerMenuView({ onNavigateAdmin }) {
         {/* 4. Luxury Footer */}
         <Footer
           settings={data.settings}
-          onAdminClick={onNavigateAdmin}
         />
       </div>
 

@@ -1,13 +1,13 @@
 import React from 'react';
-import { Phone, MessageCircle, MapPin, Lock, ShieldCheck } from 'lucide-react';
+import { Phone, MessageCircle, MapPin, ShieldCheck } from 'lucide-react';
 
-export default function Footer({ settings, onAdminClick }) {
+export default function Footer({ settings }) {
   const {
     hotelName = "Dining Delight Multicuisine Restaurant",
     phone = "09428925716",
     whatsapp = "+919428925716",
     address = "Bhavana Society, opp. Viral Vatika, near Shital Park Road, Puneet Nagar, Bajrang Wadi, Rajkot, Gujarat 360006",
-    googleMapsUrl = "https://maps.app.goo.gl/YKQURwjkkjW7NJur9",
+    googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=Dining+Delight+Multicuisine+Restaurant+Rajkot",
     diningNotice = "100% Pure Veg • Scan QR for Digital Card • Rajkot, Gujarat"
   } = settings || {};
 
@@ -64,17 +64,9 @@ export default function Footer({ settings, onAdminClick }) {
           )}
         </div>
 
-        {/* Dining Notice & Owner Admin Portal Link */}
-        <div className="mt-8 pt-5 border-t border-[#D9AD52]/15 w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-[#FFF1D0]/60">
+        {/* Dining Notice */}
+        <div className="mt-8 pt-5 border-t border-[#D9AD52]/15 w-full text-center text-[#FFF1D0]/60 text-xs sm:text-sm">
           <p>{diningNotice}</p>
-
-          <button
-            onClick={onAdminClick}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#151515] hover:bg-[#1f1f24] border border-[#D9AD52]/20 text-[11px] text-[#D9AD52] hover:text-[#FFF1D0] transition-colors cursor-pointer"
-          >
-            <Lock className="w-3 h-3 text-[#FFB91F]" />
-            <span>Owner Admin Panel</span>
-          </button>
         </div>
 
         {/* Privacy Notice Banner */}

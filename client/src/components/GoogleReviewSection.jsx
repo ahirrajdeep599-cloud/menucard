@@ -3,7 +3,7 @@ import { Star, ExternalLink, QrCode, Heart, X, ShieldCheck, Utensils } from 'luc
 import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
 
-const OFFICIAL_GOOGLE_REVIEW_URL = "https://search.google.com/local/writereview?placeid=ChIJXRcodi7JWTkRUoTbfu-3QWA";
+const OFFICIAL_GOOGLE_REVIEW_URL = "https://reviews.to/dining-delight";
 
 export default function GoogleReviewSection({
   googleReviewUrl,
